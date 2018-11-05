@@ -1,6 +1,11 @@
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class GlobalAlignment {
-    private String querySequence = new String();
-    private String dbSequence = new String();
+    private String querySequence;
+    private String dbSequence;
     private int inDelPenalty;
 
     public GlobalAlignment(String querySequence, String dbSequence, int inDelPenalty) {
@@ -9,25 +14,52 @@ public class GlobalAlignment {
         this.inDelPenalty = inDelPenalty;
     }
 
-    public String[] getScoreAndAlignment() {
-        int[][] matrix = generateMatrix(this.inDelPenalty);
-        String score = getScore(matrix);
-        String alignment = generateAlignment(matrix, this.querySequence, this.dbSequence);
+    public int[][] generateMatrix() {
+        int[][] distanceMatrix = new int[this.querySequence.length() + 1][this.dbSequence.length() + 1];
+        StringBuilder alphabet = new StringBuilder();
+        int[][] scoringMatrix;
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader("alphabet.txt"));
+            String line;
 
-        return new String[] {score, this.querySequence, this.dbSequence, alignment};
-    }
+            while((line = bufferedReader.readLine()) != null) {
+                for (int i = 0; i < line.length(); i++) {
+                    if (Character.isLetter(line.charAt(i)))
+                        alphabet.append(line.charAt(i));
+                }
+            }
+            bufferedReader.close();
 
-    private int[][] generateMatrix(int inDelPenalty) {
-        int[][] matrix = new int[this.querySequence.length() + 1][this.dbSequence.length() + 1];
+            bufferedReader = new BufferedReader(new FileReader("scoringmatrix.txt"));
+            scoringMatrix = new int[alphabet.length()][alphabet.length()];
+            int rowCount = 0;
+
+            while((line = bufferedReader.readLine()) != null) {
+                int colCount = 0;
+
+                for (int i = 0; i < line.length(); i++) {
+                    if (Character.isDigit(line.charAt(i))) {
+                        scoringMatrix[rowCount][colCount] = Integer.parseInt("" + line.charAt(i));
+                        colCount++;
+                    }
+                }
+                rowCount++;
+            }
+            bufferedReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         
-        return matrix;
+
+        return distanceMatrix;
     }
 
-    private String getScore(int[][] matrix) {
-        return "";
+    public int getScore(int[][] matrix) {
+        return 0;
     }
 
-    public String generateAlignment(int[][] matrix, String querySequence, String dbSequence) {
+    public String getAlignment(int[][] matrix) {
         return "";
     }
 }

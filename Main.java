@@ -1,47 +1,45 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Main {
     public static void main(String args[]) {
-        Queue<String> priorityQueue = new PriorityQueue<>();
+        Map<Integer, List<String[]>> scoreMap = new TreeMap<>();
         List<String> querySequences = new ArrayList<>();
         List<String> dbSequences = new ArrayList<>();
-        int ch = 0;
+        int ch = 1;
         int inDelPenalty = 2;
-
-        while(!priorityQueue.isEmpty())
-            System.out.print(priorityQueue.poll());
 
         querySequences = getSequences("query.txt");
         dbSequences = getSequences("database.txt");
-
-        System.out.println("What type of alignment?");
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        try {
-            ch = Integer.parseInt(br.readLine());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         if(ch == 1) {
             for(String querySeqence : querySequences) {
                 for(String dbSequence : dbSequences) {
                     GlobalAlignment globalAlignment = new GlobalAlignment(querySeqence, dbSequence, inDelPenalty);
-                    String[] scoreAndAlignment = globalAlignment.getScoreAndAlignment();
-//                    int score = globalAlignment.getScore(matrix);
-//                    String alignment = globalAlignment.generateAlignment(matrix, querySeqence, dbSequence);
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(scoreAndAlignment[0]);
-                    sb.append(";" + querySeqence);
-                    sb.append(";" + dbSequence);
-                    sb.append(";" + scoreAndAlignment[1]);
-                    priorityQueue.add(sb.toString());
+
+                    int[][] distanceMatrix = globalAlignment.generateMatrix();
+                    int score = globalAlignment.getScore(distanceMatrix);
+
+                    String[] sequenceAlignment = new String[3];
+                    sequenceAlignment[0] = querySeqence;
+                    sequenceAlignment[1] = dbSequence;
+                    sequenceAlignment[2] = globalAlignment.getAlignment(distanceMatrix);
+
+                    if(scoreMap.containsKey(score)) {
+                        List<String[]> newList = scoreMap.get(score);
+                        newList.add(sequenceAlignment);
+                        scoreMap.put(score, newList);
+                    }
+
+                    else {
+                        List<String[]> newList = new ArrayList<>();
+                        newList.add(sequenceAlignment);
+                        scoreMap.put(score, newList);
+                    }
                 }
             }
         }
@@ -63,7 +61,6 @@ public class Main {
         List<String> sequences = new ArrayList<>();
 
         try {
-
             BufferedReader br = new BufferedReader(new FileReader(fileName));
             String line;
             StringBuilder sb = new StringBuilder();
