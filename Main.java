@@ -1,33 +1,54 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+enum Alignment {
+    GLOBAL, LOCAL, DOVETAIL;
+}
 
 public class Main {
     public static void main(String args[]) {
         Map<Integer, List<String[]>> scoreMap = new TreeMap<>();
         List<String> querySequences = new ArrayList<>();
         List<String> dbSequences = new ArrayList<>();
-        int ch = 1;
-        int inDelPenalty = 2;
+        int[][] scoringMatrix;
+        String alphabet;
+        Alignment alignment = Alignment.GLOBAL;
+        int inDelPenalty = -3;
 
-        querySequences = getSequences("query.txt");
-        dbSequences = getSequences("database.txt");
+        querySequences = getSequences("query1.txt");
+        dbSequences = getSequences("database1.txt");
+        alphabet = getAlphabet("alphabet.txt");
+        scoringMatrix = getScoringMatrix("scoringmatrix.txt", alphabet);
 
-        if(ch == 1) {
+        if(alignment == Alignment.GLOBAL) {
             for(String querySeqence : querySequences) {
                 for(String dbSequence : dbSequences) {
                     GlobalAlignment globalAlignment = new GlobalAlignment(querySeqence, dbSequence, inDelPenalty);
 
-                    int[][] distanceMatrix = globalAlignment.generateMatrix();
+                    int[][] distanceMatrix = globalAlignment.generateMatrix(alphabet, scoringMatrix);
+
+//                    System.out.println("Distance Matrix: ");
+//                    for (int i = 0; i < distanceMatrix.length; i++) {
+//                        for (int j = 0; j < distanceMatrix[0].length; j++) {
+//                            System.out.print("\t" + distanceMatrix[i][j]);
+//                        }
+//                        System.out.print("\n");
+//                    }
+
                     int score = globalAlignment.getScore(distanceMatrix);
+                    System.out.println("Score = " + score);
 
                     String[] sequenceAlignment = new String[3];
                     sequenceAlignment[0] = querySeqence;
                     sequenceAlignment[1] = dbSequence;
-                    sequenceAlignment[2] = globalAlignment.getAlignment(distanceMatrix);
+                    sequenceAlignment[2] = globalAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
+
+                    System.out.println("Alignment = " + sequenceAlignment[2]);
 
                     if(scoreMap.containsKey(score)) {
                         List<String[]> newList = scoreMap.get(score);
@@ -61,17 +82,17 @@ public class Main {
         List<String> sequences = new ArrayList<>();
 
         try {
-            BufferedReader br = new BufferedReader(new FileReader(fileName));
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
             String line;
             StringBuilder sb = new StringBuilder();
 
-            while((line = br.readLine()) != null) {
+            while((line = bufferedReader.readLine()) != null) {
                 if (line.charAt(0) == '>') {
                     if(sb.length() == 0)
                         continue;
 
                     else {
-                        sequences.add(sb.toString());
+                        sequences.add(sb.toString().toLowerCase().trim());
                         sb = new StringBuilder();
                         continue;
                     }
@@ -80,13 +101,60 @@ public class Main {
                 else
                     sb.append(line);
             }
-            sequences.add(sb.toString());
+            sequences.add(sb.toString().toLowerCase().trim());
 
-            br.close();
+            bufferedReader.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return sequences;
+    }
+
+    public static String getAlphabet(String fileName) {
+        StringBuilder alphabet = new StringBuilder();
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
+            String line;
+
+            while((line = bufferedReader.readLine()) != null) {
+                for (int i = 0; i < line.length(); i++) {
+                    if (Character.isLetter(line.charAt(i)))
+                        alphabet.append(line.charAt(i));
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return alphabet.toString().toLowerCase().trim();
+    }
+
+    public static int[][] getScoringMatrix(String fileName, String alphabet) {
+        int[][] scoringMatrix = new int[alphabet.length()][alphabet.length()];
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader("scoringmatrix.txt"));
+            String line;
+            int rowCount = 0;
+
+            while((line = bufferedReader.readLine()) != null) {
+                int colCount = 0;
+
+                for (int i = 0; i < line.length(); i++) {
+                    if (Character.isDigit(line.charAt(i))) {
+                        scoringMatrix[rowCount][colCount] = Integer.parseInt("" + line.charAt(i));
+                        if(i > 0 && line.charAt(i - 1) == '-')
+                            scoringMatrix[rowCount][colCount] = -1 * scoringMatrix[rowCount][colCount];
+                        colCount++;
+                    }
+                }
+                rowCount++;
+            }
+            bufferedReader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return scoringMatrix;
     }
 }
