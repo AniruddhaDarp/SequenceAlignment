@@ -90,7 +90,7 @@ public class DovetailAlignment {
     public int getScore(int[][] distanceMatrix) {
         int max = Integer.MIN_VALUE;
 
-        for (int i = 0; i < distanceMatrix.length; i++) {
+        for (int i = 1; i < distanceMatrix.length; i++) {
             if(distanceMatrix[i][distanceMatrix[0].length - 1] > max) {
                 max = distanceMatrix[i][distanceMatrix[0].length - 1];
                 setMaxValueRowIndex(i);
@@ -98,7 +98,7 @@ public class DovetailAlignment {
             }
         }
 
-        for (int i = 0; i < distanceMatrix[0].length; i++) {
+        for (int i = 1; i < distanceMatrix[0].length; i++) {
             if (distanceMatrix[distanceMatrix.length - 1][i] > max) {
                 max = distanceMatrix[distanceMatrix.length - 1][i];
                 setMaxValueRowIndex(distanceMatrix.length - 1);
