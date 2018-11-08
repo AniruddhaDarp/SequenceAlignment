@@ -30,7 +30,6 @@ public class GlobalAlignment {
                         distanceMatrix[i - 1][j - 1] + scoringMatrixValue);
             }
         }
-
         return distanceMatrix;
     }
 

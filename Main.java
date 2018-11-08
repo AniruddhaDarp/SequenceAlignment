@@ -17,13 +17,22 @@ public class Main {
         List<String> dbSequences = new ArrayList<>();
         int[][] scoringMatrix;
         String alphabet;
-        Alignment alignment = Alignment.GLOBAL;
-        int inDelPenalty = -3;
+        Alignment alignment = Alignment.DOVETAIL;
+        int inDelPenalty = -4;
 
         querySequences = getSequences("query.txt");
         dbSequences = getSequences("database.txt");
         alphabet = getAlphabet("alphabet.txt");
         scoringMatrix = getScoringMatrix("scoringmatrix.txt", alphabet);
+
+//        System.out.println("Scoring Matrix: ");
+//        for (int i = 0; i < scoringMatrix.length; i++) {
+//            for (int j = 0; j < scoringMatrix[0].length; j++) {
+//                System.out.print("\t" + scoringMatrix[i][j]);
+//            }
+//            System.out.print("\n");
+//        }
+
         int count = 1;
 
         if(alignment == Alignment.GLOBAL) {
@@ -62,8 +71,8 @@ public class Main {
                         newList.add(sequenceAlignment);
                         scoreMap.put(score, newList);
                     }
-                    System.out.println("Processed sequence " + count);
-                    count++;
+//                    System.out.println("Processed sequence " + count);
+//                    count++;
                 }
             }
         } else if(alignment == Alignment.LOCAL) {
@@ -72,11 +81,29 @@ public class Main {
                     LocalAlignment localAlignment = new LocalAlignment(querySequence, dbSequence, inDelPenalty);
 
                     int[][] distanceMatrix = localAlignment.generateMatrix(alphabet, scoringMatrix);
+
+//                    System.out.println("Distance Matrix: ");
+//                    for (int i = 0; i < distanceMatrix.length; i++) {
+//                        for (int j = 0; j < distanceMatrix[0].length; j++) {
+//                            System.out.print("\t" + distanceMatrix[i][j]);
+//                        }
+//                        System.out.print("\n");
+//                    }
+
                     int score = localAlignment.getScore(distanceMatrix);
                     String[] sequenceAlignment = new String[3];
-                    sequenceAlignment[0] = querySequence;
-                    sequenceAlignment[1] = dbSequence;
                     sequenceAlignment[2] = localAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
+                    int qSAlignmentStartingIndex = localAlignment.getQuerySequenceAlignmentBeginning();
+                    int qSAlignmentEndingIndex = localAlignment.getQuerySequenceAlignmentEnd();
+                    sequenceAlignment[0] = querySequence.substring(qSAlignmentStartingIndex, qSAlignmentEndingIndex + 1);
+                    int dbSAlignmentStartingIndex = localAlignment.getDbSequenceAlignmentBeginning();
+                    int dbSAlignmentEndingIndex = localAlignment.getDbSequenceAlignmentEnd();
+                    sequenceAlignment[1] = dbSequence.substring(dbSAlignmentStartingIndex, dbSAlignmentEndingIndex + 1);
+
+//                    System.out.print("\nScore = " + score);
+//                    System.out.print("\nQrSeq = " + sequenceAlignment[0]);
+//                    System.out.print("\nDbSeq = " + sequenceAlignment[1]);
+//                    System.out.print("\nAlign = " + sequenceAlignment[2]);
 
                     if(scoreMap.containsKey(score)) {
                         List<String[]> newList = scoreMap.get(score);
@@ -89,19 +116,39 @@ public class Main {
                         newList.add(sequenceAlignment);
                         scoreMap.put(score, newList);
                     }
+                    System.out.println("Processed sequence " + count + "; Score was " + score);
+                    count++;
                 }
             }
-        } else {
+        } else if (alignment == Alignment.DOVETAIL) {
             for (String querySequence : querySequences) {
                 for (String dbSequence : dbSequences) {
                     DovetailAlignment dovetailAlignment = new DovetailAlignment(querySequence, dbSequence, inDelPenalty);
 
                     int[][] distanceMatrix = dovetailAlignment.generateMatrix(alphabet, scoringMatrix);
+
+//                    System.out.println("Distance Matrix: ");
+//                    for (int i = 0; i < distanceMatrix.length; i++) {
+//                        for (int j = 0; j < distanceMatrix[0].length; j++) {
+//                            System.out.print("\t" + distanceMatrix[i][j]);
+//                        }
+//                        System.out.print("\n");
+//                    }
+
                     int score = dovetailAlignment.getScore(distanceMatrix);
                     String[] sequenceAlignment = new String[3];
-                    sequenceAlignment[0] = querySequence;
-                    sequenceAlignment[1] = dbSequence;
                     sequenceAlignment[2] = dovetailAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
+                    int qSAlignmentStartingIndex = dovetailAlignment.getQuerySequenceAlignmentBeginning();
+                    int qSAlignmentEndingIndex = dovetailAlignment.getQuerySequenceAlignmentEnd();
+                    sequenceAlignment[0] = querySequence.substring(qSAlignmentStartingIndex, qSAlignmentEndingIndex + 1);
+                    int dbSAlignmentStartingIndex = dovetailAlignment.getDbSequenceAlignmentBeginning();
+                    int dbSAlignmentEndingIndex = dovetailAlignment.getDbSequenceAlignmentEnd();
+                    sequenceAlignment[1] = dbSequence.substring(dbSAlignmentStartingIndex, dbSAlignmentEndingIndex + 1);
+
+//                    System.out.print("\nScore = " + score);
+//                    System.out.print("\nQrSeq = " + sequenceAlignment[0]);
+//                    System.out.print("\nDbSeq = " + sequenceAlignment[1]);
+//                    System.out.print("\nAlign = " + sequenceAlignment[2]);
 
                     if(scoreMap.containsKey(score)) {
                         List<String[]> newList = scoreMap.get(score);
@@ -114,21 +161,13 @@ public class Main {
                         newList.add(sequenceAlignment);
                         scoreMap.put(score, newList);
                     }
+                    System.out.println("Processed sequence " + count + "; Score was " + score);
+                    count++;
                 }
             }
+        } else {
+            System.out.println("Wrong Alignment Choice!!");
         }
-
-        //Generate Graphs, Get Time
-
-//        for (int i = 0; i < querySequences.size(); i++) {
-//            System.out.print("\nQuery sequence " + (i + 1) + ": ");
-//            System.out.print(querySequences.get(i));
-//        }
-//
-//        for (int i = 0; i < dbSequences.size(); i++) {
-//            System.out.print("\nDB sequence " + (i + 1) + ": ");
-//            System.out.print(dbSequences.get(i));
-//        }
     }
 
     public static List<String> getSequences(String fileName) {
@@ -183,7 +222,7 @@ public class Main {
     public static int[][] getScoringMatrix(String fileName, String alphabet) {
         int[][] scoringMatrix = new int[alphabet.length()][alphabet.length()];
         try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader("scoringmatrix.txt"));
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
             String line;
             int rowCount = 0;
 
