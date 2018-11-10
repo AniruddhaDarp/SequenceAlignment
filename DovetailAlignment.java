@@ -66,12 +66,15 @@ public class DovetailAlignment {
     public int[][] generateMatrix(String alphabet, int[][] scoringMatrix) {
         int[][] distanceMatrix = new int[querySequence.length() + 1][dbSequence.length() + 1];
 
-        for(int i = 0; i < distanceMatrix.length; i++)
+        // Distance Matrix Initialization
+        for(int i = 0; i < distanceMatrix.length; i++) {
             distanceMatrix[i][0] = 0;
-
-        for(int i = 0; i < distanceMatrix[0].length; i++)
+        }
+        for(int i = 0; i < distanceMatrix[0].length; i++) {
             distanceMatrix[0][i] = 0;
+        }
 
+        // Distance Matrix population
         for (int i = 1; i < distanceMatrix.length; i++) {
             for (int j = 1; j < distanceMatrix[0].length; j++) {
                 int querySequenceAlphabetIndex = alphabet.indexOf(querySequence.charAt(i - 1));
@@ -111,8 +114,11 @@ public class DovetailAlignment {
         return max;
     }
 
-    public String getAlignment(int[][] distanceMatrix, int[][] scoringMatrix, String alphabet) {
+    public String[] getAlignment(int[][] distanceMatrix, int[][] scoringMatrix, String alphabet) {
         StringBuilder alignment = new StringBuilder();
+        StringBuilder qsAlignment = new StringBuilder();
+        StringBuilder dsAlignment = new StringBuilder();
+        String[] sequenceAndAlignment = new String[3];
         int i = getMaxValueRowIndex();
         int j = getMaxValueColIndex();
 
@@ -123,24 +129,35 @@ public class DovetailAlignment {
             int topValue = distanceMatrix[i - 1][j] + inDelPenalty;
             int leftValue = distanceMatrix[i][j - 1] + inDelPenalty;
             int diagonalValue = distanceMatrix[i - 1][j - 1] + scoringMatrixValue;
+            System.out.println("i = " + i + "; j = " + j);
+            System.out.println("S = " + distanceMatrix[i][j] + "; D = " + diagonalValue + "; T = " + topValue + "; L = " + leftValue);
+            System.out.println("----------");
 
             if (diagonalValue == distanceMatrix[i][j]) {
-                if (querySequence.charAt(i - 1) == dbSequence.charAt(j - 1))
+                if (querySequence.charAt(i - 1) == dbSequence.charAt(j - 1)) {
                     alignment.append("|");
-                else
+                } else {
                     alignment.append("r");
+                }
 
+                qsAlignment.append(querySequence.charAt(i - 1));
+                dsAlignment.append(dbSequence.charAt(j - 1));
                 i--;
                 j--;
             } else if (topValue == distanceMatrix[i][j]) {
                 alignment.append("d");
-                j--;
+                qsAlignment.append(querySequence.charAt(i - 1));
+                dsAlignment.append('-');
+                i--;
             } else if (leftValue == distanceMatrix[i][j]) {
                 alignment.append("i");
+                qsAlignment.append('-');
+                dsAlignment.append(dbSequence.charAt(j - 1));
                 i--;
-            } else {
-                System.out.println("No match!");
             }
+//            else {
+//                System.out.println("No match!");
+//            }
 
             if (i == 0 || j == 0) {
                 setQuerySequenceAlignmentBeginning(i);
@@ -149,6 +166,10 @@ public class DovetailAlignment {
             }
         }
 
-        return alignment.reverse().toString();
+        sequenceAndAlignment[0] = qsAlignment.reverse().toString();
+        sequenceAndAlignment[1] = dsAlignment.reverse().toString();
+        sequenceAndAlignment[2] = alignment.reverse().toString();
+
+        return sequenceAndAlignment;
     }
 }

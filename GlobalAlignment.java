@@ -12,12 +12,15 @@ public class GlobalAlignment {
     public int[][] generateMatrix(String alphabet, int[][] scoringMatrix) {
         int[][] distanceMatrix = new int[querySequence.length() + 1][dbSequence.length() + 1];
 
-        for(int i = 0; i < distanceMatrix.length; i++)
+        // Distance Matrix Initialization
+        for(int i = 0; i < distanceMatrix.length; i++) {
             distanceMatrix[i][0] = i * this.inDelPenalty;
-
-        for(int i = 0; i < distanceMatrix[0].length; i++)
+        }
+        for(int i = 0; i < distanceMatrix[0].length; i++) {
             distanceMatrix[0][i] = i * this.inDelPenalty;
+        }
 
+        // Distance Matrix population
         for (int i = 1; i < distanceMatrix.length; i++) {
             for (int j = 1; j < distanceMatrix[0].length; j++) {
                 int querySequenceAlphabetIndex = alphabet.indexOf(querySequence.charAt(i - 1));
@@ -65,11 +68,11 @@ public class GlobalAlignment {
                 int querySequenceAlphabetIndex = alphabet.indexOf(querySequence.charAt(i - 1));
                 int dbSequenceAlphabetIndex = alphabet.indexOf(dbSequence.charAt(j - 1));
                 int scoringMatrixValue = scoringMatrix[querySequenceAlphabetIndex][dbSequenceAlphabetIndex];
-                int topValue = distanceMatrix[i - 1][j] + inDelPenalty;
-                int leftValue = distanceMatrix[i][j - 1] + inDelPenalty;
-                int diagonalValue = distanceMatrix[i - 1][j - 1] + scoringMatrixValue;
+                int topValue = distanceMatrix[i][j] - inDelPenalty;
+                int leftValue = distanceMatrix[i][j] - inDelPenalty;
+                int diagonalValue = distanceMatrix[i][j] - scoringMatrixValue;
 
-                if (diagonalValue == distanceMatrix[i][j]) {
+                if (diagonalValue == distanceMatrix[i - 1][j - 1]) {
                     if (querySequence.charAt(i - 1) == dbSequence.charAt(j - 1)) {
                         alignment.append("|");
                     } else {
@@ -80,32 +83,23 @@ public class GlobalAlignment {
                     dsAlignment.append(dbSequence.charAt(j - 1));
                     i--;
                     j--;
-                } else if (topValue == distanceMatrix[i][j]) {
+                } else if (topValue == distanceMatrix[i - 1][j]) {
                     alignment.append("d");
                     qsAlignment.append(querySequence.charAt(i - 1));
                     dsAlignment.append('-');
                     i--;
-                } else if (leftValue == distanceMatrix[i][j]) {
+                } else if (leftValue == distanceMatrix[i][j - 1]) {
                     alignment.append("i");
                     qsAlignment.append('-');
                     dsAlignment.append(dbSequence.charAt(j - 1));
                     j--;
                 }
-//                else {
-//                    System.out.println("No match!");
-//                }
             }
         }
 
-        sequencesAndAlignment[2] = alignment.reverse().toString();
         sequencesAndAlignment[0] = qsAlignment.reverse().toString();
         sequencesAndAlignment[1] = dsAlignment.reverse().toString();
-
-        if(sequencesAndAlignment[2].length() != sequencesAndAlignment[0].length())
-            System.out.println("Query and alignment have different lengths!!");
-
-        if(sequencesAndAlignment[1].length() != sequencesAndAlignment[0].length())
-            System.out.println("DB and alignment have different lengths!!");
+        sequencesAndAlignment[2] = alignment.reverse().toString();
 
         return sequencesAndAlignment;
     }

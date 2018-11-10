@@ -24,6 +24,7 @@ public class Main {
         dbSequences = getSequences("database.txt");
         alphabet = getAlphabet("alphabet.txt");
         scoringMatrix = getScoringMatrix("scoringmatrix.txt", alphabet);
+        int count = 1;
 
 //        System.out.println("Scoring Matrix: ");
 //        for (int i = 0; i < scoringMatrix.length; i++) {
@@ -33,23 +34,12 @@ public class Main {
 //            System.out.print("\n");
 //        }
 
-        int count = 1;
-
         if(alignment == Alignment.GLOBAL) {
             for(String querySequence : querySequences) {
                 for(String dbSequence : dbSequences) {
                     GlobalAlignment globalAlignment = new GlobalAlignment(querySequence, dbSequence, inDelPenalty);
 
                     int[][] distanceMatrix = globalAlignment.generateMatrix(alphabet, scoringMatrix);
-
-//                    System.out.println("Distance Matrix: ");
-//                    for (int i = 0; i < distanceMatrix.length; i++) {
-//                        for (int j = 0; j < distanceMatrix[0].length; j++) {
-//                            System.out.print("\t" + distanceMatrix[i][j]);
-//                        }
-//                        System.out.print("\n");
-//                    }
-
                     int score = globalAlignment.getScore(distanceMatrix);
                     String[] sequenceAlignment = globalAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
 
@@ -74,29 +64,8 @@ public class Main {
                     LocalAlignment localAlignment = new LocalAlignment(querySequence, dbSequence, inDelPenalty);
 
                     int[][] distanceMatrix = localAlignment.generateMatrix(alphabet, scoringMatrix);
-
-//                    System.out.println("Distance Matrix: ");
-//                    for (int i = 0; i < distanceMatrix.length; i++) {
-//                        for (int j = 0; j < distanceMatrix[0].length; j++) {
-//                            System.out.print("\t" + distanceMatrix[i][j]);
-//                        }
-//                        System.out.print("\n");
-//                    }
-
                     int score = localAlignment.getScore(distanceMatrix);
-                    String[] sequenceAlignment = new String[3];
-                    sequenceAlignment[2] = localAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
-                    int qSAlignmentStartingIndex = localAlignment.getQuerySequenceAlignmentBeginning();
-                    int qSAlignmentEndingIndex = localAlignment.getQuerySequenceAlignmentEnd();
-                    sequenceAlignment[0] = querySequence.substring(qSAlignmentStartingIndex, qSAlignmentEndingIndex + 1);
-                    int dbSAlignmentStartingIndex = localAlignment.getDbSequenceAlignmentBeginning();
-                    int dbSAlignmentEndingIndex = localAlignment.getDbSequenceAlignmentEnd();
-                    sequenceAlignment[1] = dbSequence.substring(dbSAlignmentStartingIndex, dbSAlignmentEndingIndex + 1);
-
-//                    System.out.print("\nScore = " + score);
-//                    System.out.print("\nQrSeq = " + sequenceAlignment[0]);
-//                    System.out.print("\nDbSeq = " + sequenceAlignment[1]);
-//                    System.out.print("\nAlign = " + sequenceAlignment[2]);
+                    String[] sequenceAlignment = localAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
 
                     if(scoreMap.containsKey(score)) {
                         List<String[]> newList = scoreMap.get(score);
@@ -120,28 +89,20 @@ public class Main {
 
                     int[][] distanceMatrix = dovetailAlignment.generateMatrix(alphabet, scoringMatrix);
 
-//                    System.out.println("Distance Matrix: ");
-//                    for (int i = 0; i < distanceMatrix.length; i++) {
-//                        for (int j = 0; j < distanceMatrix[0].length; j++) {
-//                            System.out.print("\t" + distanceMatrix[i][j]);
-//                        }
-//                        System.out.print("\n");
-//                    }
+                    System.out.println("Distance Matrix: ");
+                    for (int i = 0; i < distanceMatrix.length; i++) {
+                        for (int j = 0; j < distanceMatrix[0].length; j++) {
+                            System.out.print("\t" + distanceMatrix[i][j]);
+                        }
+                        System.out.print("\n");
+                    }
 
                     int score = dovetailAlignment.getScore(distanceMatrix);
-                    String[] sequenceAlignment = new String[3];
-                    sequenceAlignment[2] = dovetailAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
-                    int qSAlignmentStartingIndex = dovetailAlignment.getQuerySequenceAlignmentBeginning();
-                    int qSAlignmentEndingIndex = dovetailAlignment.getQuerySequenceAlignmentEnd();
-                    sequenceAlignment[0] = querySequence.substring(qSAlignmentStartingIndex, qSAlignmentEndingIndex + 1);
-                    int dbSAlignmentStartingIndex = dovetailAlignment.getDbSequenceAlignmentBeginning();
-                    int dbSAlignmentEndingIndex = dovetailAlignment.getDbSequenceAlignmentEnd();
-                    sequenceAlignment[1] = dbSequence.substring(dbSAlignmentStartingIndex, dbSAlignmentEndingIndex + 1);
+                    String[] sequenceAlignment = dovetailAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
 
-//                    System.out.print("\nScore = " + score);
-//                    System.out.print("\nQrSeq = " + sequenceAlignment[0]);
-//                    System.out.print("\nDbSeq = " + sequenceAlignment[1]);
-//                    System.out.print("\nAlign = " + sequenceAlignment[2]);
+                    System.out.println(sequenceAlignment[0]);
+                    System.out.println(sequenceAlignment[1]);
+                    System.out.println(sequenceAlignment[2]);
 
                     if(scoreMap.containsKey(score)) {
                         List<String[]> newList = scoreMap.get(score);
