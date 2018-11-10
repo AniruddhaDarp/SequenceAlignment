@@ -17,8 +17,8 @@ public class Main {
         List<String> dbSequences = new ArrayList<>();
         int[][] scoringMatrix;
         String alphabet;
-        Alignment alignment = Alignment.DOVETAIL;
-        int inDelPenalty = -4;
+        Alignment alignment = Alignment.GLOBAL;
+        int inDelPenalty = -1;
 
         querySequences = getSequences("query.txt");
         dbSequences = getSequences("database.txt");
@@ -51,14 +51,7 @@ public class Main {
 //                    }
 
                     int score = globalAlignment.getScore(distanceMatrix);
-//                    System.out.println("Score = " + score);
-
-                    String[] sequenceAlignment = new String[3];
-                    sequenceAlignment[0] = querySequence;
-                    sequenceAlignment[1] = dbSequence;
-                    sequenceAlignment[2] = globalAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
-
-//                    System.out.println("Alignment = " + sequenceAlignment[2]);
+                    String[] sequenceAlignment = globalAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
 
                     if(scoreMap.containsKey(score)) {
                         List<String[]> newList = scoreMap.get(score);
@@ -71,8 +64,8 @@ public class Main {
                         newList.add(sequenceAlignment);
                         scoreMap.put(score, newList);
                     }
-//                    System.out.println("Processed sequence " + count);
-//                    count++;
+                    System.out.println("Processed sequence " + count);
+                    count++;
                 }
             }
         } else if(alignment == Alignment.LOCAL) {
