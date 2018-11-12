@@ -17,7 +17,7 @@ public class Main {
         List<String> dbSequences = new ArrayList<>();
         int[][] scoringMatrix;
         String alphabet;
-        Alignment alignment = Alignment.GLOBAL;
+        Alignment alignment = Alignment.DOVETAIL;
         int inDelPenalty = -1;
 
         querySequences = getSequences("query.txt");
@@ -89,20 +89,20 @@ public class Main {
 
                     int[][] distanceMatrix = dovetailAlignment.generateMatrix(alphabet, scoringMatrix);
 
-                    System.out.println("Distance Matrix: ");
-                    for (int i = 0; i < distanceMatrix.length; i++) {
-                        for (int j = 0; j < distanceMatrix[0].length; j++) {
-                            System.out.print("\t" + distanceMatrix[i][j]);
-                        }
-                        System.out.print("\n");
-                    }
+//                    System.out.println("Distance Matrix: ");
+//                    for (int i = 0; i < distanceMatrix.length; i++) {
+//                        for (int j = 0; j < distanceMatrix[0].length; j++) {
+//                            System.out.print("\t" + distanceMatrix[i][j]);
+//                        }
+//                        System.out.print("\n");
+//                    }
 
                     int score = dovetailAlignment.getScore(distanceMatrix);
                     String[] sequenceAlignment = dovetailAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
 
-                    System.out.println(sequenceAlignment[0]);
-                    System.out.println(sequenceAlignment[1]);
-                    System.out.println(sequenceAlignment[2]);
+//                    System.out.println(sequenceAlignment[0]);
+//                    System.out.println(sequenceAlignment[1]);
+//                    System.out.println(sequenceAlignment[2]);
 
                     if(scoreMap.containsKey(score)) {
                         List<String[]> newList = scoreMap.get(score);

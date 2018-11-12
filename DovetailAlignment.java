@@ -126,14 +126,14 @@ public class DovetailAlignment {
             int querySequenceAlphabetIndex = alphabet.indexOf(querySequence.charAt(i - 1));
             int dbSequenceAlphabetIndex = alphabet.indexOf(dbSequence.charAt(j - 1));
             int scoringMatrixValue = scoringMatrix[querySequenceAlphabetIndex][dbSequenceAlphabetIndex];
-            int topValue = distanceMatrix[i - 1][j] + inDelPenalty;
-            int leftValue = distanceMatrix[i][j - 1] + inDelPenalty;
-            int diagonalValue = distanceMatrix[i - 1][j - 1] + scoringMatrixValue;
-            System.out.println("i = " + i + "; j = " + j);
-            System.out.println("S = " + distanceMatrix[i][j] + "; D = " + diagonalValue + "; T = " + topValue + "; L = " + leftValue);
-            System.out.println("----------");
+            int topValue = distanceMatrix[i][j] - inDelPenalty;
+            int leftValue = distanceMatrix[i][j] - inDelPenalty;
+            int diagonalValue = distanceMatrix[i][j] - scoringMatrixValue;
+//            System.out.println("i = " + i + "; j = " + j);
+//            System.out.println("S = " + distanceMatrix[i][j] + "; D = " + diagonalValue + "; T = " + topValue + "; L = " + leftValue);
+//            System.out.println("----------");
 
-            if (diagonalValue == distanceMatrix[i][j]) {
+            if (diagonalValue == distanceMatrix[i - 1][j - 1]) {
                 if (querySequence.charAt(i - 1) == dbSequence.charAt(j - 1)) {
                     alignment.append("|");
                 } else {
@@ -144,20 +144,17 @@ public class DovetailAlignment {
                 dsAlignment.append(dbSequence.charAt(j - 1));
                 i--;
                 j--;
-            } else if (topValue == distanceMatrix[i][j]) {
+            } else if (topValue == distanceMatrix[i - 1][j]) {
                 alignment.append("d");
                 qsAlignment.append(querySequence.charAt(i - 1));
                 dsAlignment.append('-');
                 i--;
-            } else if (leftValue == distanceMatrix[i][j]) {
+            } else if (leftValue == distanceMatrix[i][j - 1]) {
                 alignment.append("i");
                 qsAlignment.append('-');
                 dsAlignment.append(dbSequence.charAt(j - 1));
-                i--;
+                j--;
             }
-//            else {
-//                System.out.println("No match!");
-//            }
 
             if (i == 0 || j == 0) {
                 setQuerySequenceAlignmentBeginning(i);
