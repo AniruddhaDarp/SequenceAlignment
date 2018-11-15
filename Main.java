@@ -1,10 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 enum Alignment {
     GLOBAL, LOCAL, DOVETAIL;
@@ -12,191 +6,115 @@ enum Alignment {
 
 public class Main {
     public static void main(String args[]) {
-        Map<Integer, List<String[]>> scoreMap = new TreeMap<>();
-        List<String> querySequences = new ArrayList<>();
-        List<String> dbSequences = new ArrayList<>();
+        List<String> querySequences;
+        List<String> dbSequences;
+        List<String> queryIds;
+        List<String> dbIds;
+        List<ResultObject> listOfResults = new ArrayList<>();
         int[][] scoringMatrix;
         String alphabet;
-        Alignment alignment = Alignment.DOVETAIL;
+        Alignment alignment = Alignment.GLOBAL;
         int inDelPenalty = -1;
 
-        querySequences = getSequences("query.txt");
-        dbSequences = getSequences("database.txt");
-        alphabet = getAlphabet("alphabet.txt");
-        scoringMatrix = getScoringMatrix("scoringmatrix.txt", alphabet);
-        int count = 1;
-
-//        System.out.println("Scoring Matrix: ");
-//        for (int i = 0; i < scoringMatrix.length; i++) {
-//            for (int j = 0; j < scoringMatrix[0].length; j++) {
-//                System.out.print("\t" + scoringMatrix[i][j]);
-//            }
-//            System.out.print("\n");
-//        }
+        FileHandler fileHandler = new FileHandler();
+        querySequences = fileHandler.getSequences("query.txt");
+        dbSequences = fileHandler.getSequences("database.txt");
+        queryIds = fileHandler.getIds("query.txt");
+        dbIds = fileHandler.getIds("database.txt");
+        alphabet = fileHandler.getAlphabet("alphabet.txt");
+        scoringMatrix = fileHandler.getScoringMatrix("scoringmatrix.txt", alphabet);
+        int count = 0;
+        int k = 10;
 
         if(alignment == Alignment.GLOBAL) {
-            for(String querySequence : querySequences) {
-                for(String dbSequence : dbSequences) {
+            listOfResults = new ArrayList<>();
+            for(int i = 0; i < querySequences.size(); i++) {
+                String querySequence = querySequences.get(i);
+
+                for(int j = 0; j < dbSequences.size(); j++) {
+                    String dbSequence = dbSequences.get(j);
+                    long startTime = System.currentTimeMillis();
                     GlobalAlignment globalAlignment = new GlobalAlignment(querySequence, dbSequence, inDelPenalty);
 
                     int[][] distanceMatrix = globalAlignment.generateMatrix(alphabet, scoringMatrix);
-                    int score = globalAlignment.getScore(distanceMatrix);
                     String[] sequenceAlignment = globalAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
+                    long timeTaken = System.currentTimeMillis() - startTime;
 
-                    if(scoreMap.containsKey(score)) {
-                        List<String[]> newList = scoreMap.get(score);
-                        newList.add(sequenceAlignment);
-                        scoreMap.put(score, newList);
-                    }
+                    listOfResults.add(new ResultObject(globalAlignment.getScore(distanceMatrix), 0,
+                            0, sequenceAlignment[0], sequenceAlignment[1], queryIds.get(i), dbIds.get(j),
+                            timeTaken));
 
-                    else {
-                        List<String[]> newList = new ArrayList<>();
-                        newList.add(sequenceAlignment);
-                        scoreMap.put(score, newList);
-                    }
-                    System.out.println("Processed sequence " + count);
+                    System.out.println(count + "; " + timeTaken);
                     count++;
                 }
             }
         } else if(alignment == Alignment.LOCAL) {
-            for (String querySequence : querySequences) {
-                for (String dbSequence : dbSequences) {
+            listOfResults = new ArrayList<>();
+            for(int i = 0; i < querySequences.size(); i++) {
+                String querySequence = querySequences.get(i);
+
+                for(int j = 0; j < dbSequences.size(); j++) {
+                    String dbSequence = dbSequences.get(j);
+                    long startTime = System.currentTimeMillis();
                     LocalAlignment localAlignment = new LocalAlignment(querySequence, dbSequence, inDelPenalty);
 
                     int[][] distanceMatrix = localAlignment.generateMatrix(alphabet, scoringMatrix);
-                    int score = localAlignment.getScore(distanceMatrix);
                     String[] sequenceAlignment = localAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
+                    long timeTaken = System.currentTimeMillis() - startTime;
 
-                    if(scoreMap.containsKey(score)) {
-                        List<String[]> newList = scoreMap.get(score);
-                        newList.add(sequenceAlignment);
-                        scoreMap.put(score, newList);
-                    }
+                    listOfResults.add(new ResultObject(localAlignment.getScore(distanceMatrix),
+                            localAlignment.getQuerySequenceAlignmentBeginning(),
+                            localAlignment.getDbSequenceAlignmentBeginning(),
+                            sequenceAlignment[0], sequenceAlignment[1], queryIds.get(i), dbIds.get(j),
+                            timeTaken));
 
-                    else {
-                        List<String[]> newList = new ArrayList<>();
-                        newList.add(sequenceAlignment);
-                        scoreMap.put(score, newList);
-                    }
-                    System.out.println("Processed sequence " + count + "; Score was " + score);
+                    System.out.println(count + "; " + timeTaken);
                     count++;
                 }
             }
         } else if (alignment == Alignment.DOVETAIL) {
-            for (String querySequence : querySequences) {
-                for (String dbSequence : dbSequences) {
+            listOfResults = new ArrayList<>();
+            for(int i = 0; i < querySequences.size(); i++) {
+                String querySequence = querySequences.get(i);
+
+                for(int j = 0; j < dbSequences.size(); j++) {
+                    String dbSequence = dbSequences.get(j);
+                    long startTime = System.currentTimeMillis();
                     DovetailAlignment dovetailAlignment = new DovetailAlignment(querySequence, dbSequence, inDelPenalty);
 
                     int[][] distanceMatrix = dovetailAlignment.generateMatrix(alphabet, scoringMatrix);
-
-//                    System.out.println("Distance Matrix: ");
-//                    for (int i = 0; i < distanceMatrix.length; i++) {
-//                        for (int j = 0; j < distanceMatrix[0].length; j++) {
-//                            System.out.print("\t" + distanceMatrix[i][j]);
-//                        }
-//                        System.out.print("\n");
-//                    }
-
-                    int score = dovetailAlignment.getScore(distanceMatrix);
                     String[] sequenceAlignment = dovetailAlignment.getAlignment(distanceMatrix, scoringMatrix, alphabet);
+                    long timeTaken = System.currentTimeMillis() - startTime;
 
-//                    System.out.println(sequenceAlignment[0]);
-//                    System.out.println(sequenceAlignment[1]);
-//                    System.out.println(sequenceAlignment[2]);
+                    listOfResults.add(new ResultObject(dovetailAlignment.getScore(distanceMatrix),
+                            dovetailAlignment.getQuerySequenceAlignmentBeginning(),
+                            dovetailAlignment.getDbSequenceAlignmentBeginning(),
+                            sequenceAlignment[0], sequenceAlignment[1], queryIds.get(i), dbIds.get(j), timeTaken));
 
-                    if(scoreMap.containsKey(score)) {
-                        List<String[]> newList = scoreMap.get(score);
-                        newList.add(sequenceAlignment);
-                        scoreMap.put(score, newList);
-                    }
-
-                    else {
-                        List<String[]> newList = new ArrayList<>();
-                        newList.add(sequenceAlignment);
-                        scoreMap.put(score, newList);
-                    }
-                    System.out.println("Processed sequence " + count + "; Score was " + score);
+                    System.out.println(count);
                     count++;
                 }
             }
-        } else {
-            System.out.println("Wrong Alignment Choice!!");
+        }
+
+        printTopK(k, listOfResults);
+    }
+
+    public static void printTopK(int k, List<ResultObject> listOfResults) {
+        Collections.sort(listOfResults, new SortByScore());
+
+        for (int i = 0; i < k; i++) {
+            ResultObject r = (ResultObject) listOfResults.get(i);
+            System.out.println("\n\n" + (i + 1) + ") Score = " + r.getScore());
+            System.out.println(r.getQueryId() + "\t" + r.getQuerySequenceStart() + "\t" + r.getQuerySequence());
+            System.out.println(r.getDbId() + "\t" + r.getDbSequenceStart() + "\t" + r.getDbSequence());
+            System.out.print("\n--------------------------XXX--------------------------");
         }
     }
 
-    public static List<String> getSequences(String fileName) {
-        List<String> sequences = new ArrayList<>();
-
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
-            String line;
-            StringBuilder sb = new StringBuilder();
-
-            while((line = bufferedReader.readLine()) != null) {
-                if (line.charAt(0) == '>') {
-                    if(sb.length() == 0)
-                        continue;
-
-                    else {
-                        sequences.add(sb.toString().toLowerCase().trim());
-                        sb = new StringBuilder();
-                        continue;
-                    }
-                }
-
-                else
-                    sb.append(line);
-            }
-            sequences.add(sb.toString().toLowerCase().trim());
-            bufferedReader.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+    static class SortByScore implements Comparator<ResultObject> {
+        public int compare(ResultObject a, ResultObject b) {
+            return b.getScore() - a.getScore();
         }
-        return sequences;
-    }
-
-    public static String getAlphabet(String fileName) {
-        StringBuilder alphabet = new StringBuilder();
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
-            String line;
-
-            while((line = bufferedReader.readLine()) != null) {
-                for (int i = 0; i < line.length(); i++) {
-                    if (Character.isLetter(line.charAt(i)))
-                        alphabet.append(line.charAt(i));
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return alphabet.toString().toLowerCase().trim();
-    }
-
-    public static int[][] getScoringMatrix(String fileName, String alphabet) {
-        int[][] scoringMatrix = new int[alphabet.length()][alphabet.length()];
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
-            String line;
-            int rowCount = 0;
-
-            while((line = bufferedReader.readLine()) != null) {
-                int colCount = 0;
-
-                for (int i = 0; i < line.length(); i++) {
-                    if (Character.isDigit(line.charAt(i))) {
-                        scoringMatrix[rowCount][colCount] = Integer.parseInt("" + line.charAt(i));
-                        if(i > 0 && line.charAt(i - 1) == '-')
-                            scoringMatrix[rowCount][colCount] = -1 * scoringMatrix[rowCount][colCount];
-                        colCount++;
-                    }
-                }
-                rowCount++;
-            }
-            bufferedReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return scoringMatrix;
     }
 }
