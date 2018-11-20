@@ -6,10 +6,9 @@ public class ResultObject {
     private String dbSequence;
     private String queryId;
     private String dbId;
-    private long time;
 
     public ResultObject(int score, int querySequenceStart, int dbSequenceStart, String querySequence,
-                        String dbSequence, String queryId, String dbId, long time) {
+                        String dbSequence, String queryId, String dbId) {
         this.score = score;
         this.querySequenceStart = querySequenceStart;
         this.dbSequenceStart = dbSequenceStart;
@@ -17,7 +16,6 @@ public class ResultObject {
         this.dbSequence = dbSequence;
         this.queryId = queryId;
         this.dbId = dbId;
-        this.time = time;
     }
 
     public int getScore() {
