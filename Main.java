@@ -13,7 +13,7 @@ public class Main {
         List<ResultObject> listOfResults = new ArrayList<>();
         int[][] scoringMatrix;
         String alphabet;
-        Alignment alignment = Alignment.GLOBAL;
+        Alignment alignment = Alignment.DOVETAIL;
         int inDelPenalty = -1;
 
         FileHandler fileHandler = new FileHandler();
@@ -23,7 +23,7 @@ public class Main {
         dbIds = fileHandler.getIds("database.txt");
         alphabet = fileHandler.getAlphabet("alphabet.txt");
         scoringMatrix = fileHandler.getScoringMatrix("scoringmatrix.txt", alphabet);
-        int k = 100;
+        int k = 10;
 
         if(alignment == Alignment.GLOBAL) {
             listOfResults = new ArrayList<>();
@@ -98,11 +98,11 @@ public class Main {
 
         for (int i = 0; i < k; i++) {
             ResultObject r = (ResultObject) listOfResults.get(i);
-            System.out.println(r.getScore());
-//            System.out.println("\n\n" + (i + 1) + ") Score = " + r.getScore());
-//            System.out.println(r.getQueryId() + "\t" + r.getQuerySequenceStart() + "\t" + r.getQuerySequence());
-//            System.out.println(r.getDbId() + "\t" + r.getDbSequenceStart() + "\t" + r.getDbSequence());
-//            System.out.print("\n--------------------------XXX--------------------------");
+//            System.out.println(r.getScore());
+            System.out.println("\n\n" + (i + 1) + ") Score = " + r.getScore());
+            System.out.println(r.getQueryId() + "\t" + r.getQuerySequenceStart() + "\t" + r.getQuerySequence());
+            System.out.println(r.getDbId() + "\t" + r.getDbSequenceStart() + "\t" + r.getDbSequence());
+            System.out.print("\n--------------------------XXX--------------------------");
         }
     }
 
