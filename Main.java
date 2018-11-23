@@ -6,6 +6,12 @@ enum Alignment {
 
 public class Main {
     public static void main(String args[]) {
+        String queryFile = args[0];
+        String dbFile = args[1];
+        String alphabetFile = args[2];
+        String scoringMatrixFile = args[3];
+        int k = Integer.parseInt(args[4]);
+        int inDelPenalty = Integer.parseInt(args[5]);
         List<String> querySequences;
         List<String> dbSequences;
         List<String> queryIds;
@@ -14,22 +20,19 @@ public class Main {
         int[][] scoringMatrix;
         String alphabet;
         Alignment alignment = Alignment.DOVETAIL;
-        int inDelPenalty = -1;
 
         FileHandler fileHandler = new FileHandler();
-        querySequences = fileHandler.getSequences("query.txt");
-        dbSequences = fileHandler.getSequences("database.txt");
-        queryIds = fileHandler.getIds("query.txt");
-        dbIds = fileHandler.getIds("database.txt");
-        alphabet = fileHandler.getAlphabet("alphabet.txt");
-        scoringMatrix = fileHandler.getScoringMatrix("scoringmatrix.txt", alphabet);
-        int k = 10;
+        querySequences = fileHandler.getSequences(queryFile);
+        dbSequences = fileHandler.getSequences(dbFile);
+        queryIds = fileHandler.getIds(queryFile);
+        dbIds = fileHandler.getIds(dbFile);
+        alphabet = fileHandler.getAlphabet(alphabetFile);
+        scoringMatrix = fileHandler.getScoringMatrix(scoringMatrixFile, alphabet);
 
         if(alignment == Alignment.GLOBAL) {
             listOfResults = new ArrayList<>();
             for(int i = 0; i < querySequences.size(); i++) {
                 String querySequence = querySequences.get(i);
-//                long startTime = System.currentTimeMillis();
 
                 for(int j = 0; j < dbSequences.size(); j++) {
                     String dbSequence = dbSequences.get(j);
@@ -42,14 +45,11 @@ public class Main {
                     listOfResults.add(new ResultObject(score, 0,
                             0, sequenceAlignment[0], sequenceAlignment[1], queryIds.get(i), dbIds.get(j)));
                 }
-//                long timeTaken = System.currentTimeMillis() - startTime;
-//                System.out.println((i + 1) + ") Time = " + timeTaken + "; Length = " + querySequence.length());
             }
         } else if(alignment == Alignment.LOCAL) {
             listOfResults = new ArrayList<>();
             for(int i = 0; i < querySequences.size(); i++) {
                 String querySequence = querySequences.get(i);
-//                long startTime = System.currentTimeMillis();
 
                 for(int j = 0; j < dbSequences.size(); j++) {
                     String dbSequence = dbSequences.get(j);
@@ -63,14 +63,11 @@ public class Main {
                             localAlignment.getDbSequenceAlignmentBeginning(),
                             sequenceAlignment[0], sequenceAlignment[1], queryIds.get(i), dbIds.get(j)));
                 }
-//                long timeTaken = System.currentTimeMillis() - startTime;
-//                System.out.println((i + 1) + ") Time = " + timeTaken + "; Length = " + querySequence.length());
             }
         } else if (alignment == Alignment.DOVETAIL) {
             listOfResults = new ArrayList<>();
             for(int i = 0; i < querySequences.size(); i++) {
                 String querySequence = querySequences.get(i);
-//                long startTime = System.currentTimeMillis();
 
                 for(int j = 0; j < dbSequences.size(); j++) {
                     String dbSequence = dbSequences.get(j);
@@ -85,8 +82,6 @@ public class Main {
                             dovetailAlignment.getDbSequenceAlignmentBeginning(),
                             sequenceAlignment[0], sequenceAlignment[1], queryIds.get(i), dbIds.get(j)));
                 }
-//                long timeTaken = System.currentTimeMillis() - startTime;
-//                System.out.println((i + 1) + ") Time = " + timeTaken + "; Length = " + querySequence.length());
             }
         }
 
@@ -97,12 +92,10 @@ public class Main {
         Collections.sort(listOfResults, new SortByScore());
 
         for (int i = 0; i < k; i++) {
-            ResultObject r = (ResultObject) listOfResults.get(i);
-//            System.out.println(r.getScore());
+            ResultObject r = listOfResults.get(i);
             System.out.println("\n\n" + (i + 1) + ") Score = " + r.getScore());
-            System.out.println(r.getQueryId() + "\t" + r.getQuerySequenceStart() + "\t" + r.getQuerySequence());
-            System.out.println(r.getDbId() + "\t" + r.getDbSequenceStart() + "\t" + r.getDbSequence());
-            System.out.print("\n--------------------------XXX--------------------------");
+            System.out.println(r.getQueryId() + "\t\t" + r.getQuerySequenceStart() + "\t\t" + r.getQuerySequence());
+            System.out.println(r.getDbId() + "\t\t" + r.getDbSequenceStart() + "\t\t" + r.getDbSequence());
         }
     }
 
