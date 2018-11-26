@@ -1,3 +1,6 @@
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 enum Alignment {
@@ -6,12 +9,20 @@ enum Alignment {
 
 public class Main {
     public static void main(String args[]) {
-        String queryFile = args[0];
-        String dbFile = args[1];
-        String alphabetFile = args[2];
-        String scoringMatrixFile = args[3];
-        int k = Integer.parseInt(args[4]);
-        int inDelPenalty = Integer.parseInt(args[5]);
+        int algorithm = 3;
+        String queryFile = "query.txt";
+        String dbFile = "database.txt";
+        String alphabetFile = "alphabet.txt";
+        String scoringMatrixFile = "scoringmatrix.txt";
+        int k = 10;
+        int inDelPenalty = -1;
+//        int algorithm = Integer.parseInt(args[0]);
+//        String queryFile = args[1] + ".txt";
+//        String dbFile = args[2] + ".txt";
+//        String alphabetFile = args[3] + ".txt";
+//        String scoringMatrixFile = args[4] + ".txt";
+//        int k = Integer.parseInt(args[5]);
+//        int inDelPenalty = Integer.parseInt(args[6]);
         List<String> querySequences;
         List<String> dbSequences;
         List<String> queryIds;
@@ -19,7 +30,15 @@ public class Main {
         List<ResultObject> listOfResults = new ArrayList<>();
         int[][] scoringMatrix;
         String alphabet;
-        Alignment alignment = Alignment.DOVETAIL;
+        Alignment alignment;
+
+        if (algorithm == 1) {
+            alignment = Alignment.GLOBAL;
+        } else if (algorithm == 2) {
+            alignment = Alignment.LOCAL;
+        } else {
+            alignment = Alignment.DOVETAIL;
+        }
 
         FileHandler fileHandler = new FileHandler();
         querySequences = fileHandler.getSequences(queryFile);
@@ -90,12 +109,30 @@ public class Main {
 
     public static void printTopK(int k, List<ResultObject> listOfResults) {
         Collections.sort(listOfResults, new SortByScore());
+//        try {
+//            FileWriter fileWriter = new FileWriter("outputDovetail.txt");
+//            PrintWriter printWriter = new PrintWriter(fileWriter);
+//
+//            for (int i = 0; i < k; i++) {
+//                ResultObject r = listOfResults.get(i);
+//                printWriter.print("\n" + (i + 1) + ") Score = " + r.getScore());
+//                printWriter.print("\n" + r.getQueryId() + "\t\t" + r.getQuerySequenceStart() + "\t\t" + r.getQuerySequence());
+//                printWriter.print("\n" + r.getDbId() + "\t\t" + r.getDbSequenceStart() + "\t\t" + r.getDbSequence());
+//                printWriter.print("\n--------------------XXX-----------------------");
+//            }
+//
+//            printWriter.close();
+//            fileWriter.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
         for (int i = 0; i < k; i++) {
             ResultObject r = listOfResults.get(i);
-            System.out.println("\n\n" + (i + 1) + ") Score = " + r.getScore());
+            System.out.println("\n" + (i + 1) + ") Score = " + r.getScore());
             System.out.println(r.getQueryId() + "\t\t" + r.getQuerySequenceStart() + "\t\t" + r.getQuerySequence());
             System.out.println(r.getDbId() + "\t\t" + r.getDbSequenceStart() + "\t\t" + r.getDbSequence());
+            System.out.println("--------------------XXX-----------------------");
         }
     }
 

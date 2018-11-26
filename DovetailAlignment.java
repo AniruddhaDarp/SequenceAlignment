@@ -110,6 +110,8 @@ public class DovetailAlignment {
         String[] sequencesWithAlignment = new String[2];
         int i = getMaxValueRowIndex();
         int j = getMaxValueColIndex();
+//        System.out.println("i = " + i + "; j = " + j);
+//        System.out.println("Rows = " + distanceMatrix.length + "; Cols = " + distanceMatrix[0].length);
 
         while(i != 0 || j != 0) {
             int querySequenceAlphabetIndex = alphabet.indexOf(querySequence.charAt(i - 1));
@@ -135,11 +137,28 @@ public class DovetailAlignment {
             }
 
             if (i == 0 || j == 0) {
+                if (getMaxValueColIndex() == distanceMatrix[0].length - 1) {
+                    while (i != 0) {
+                        qsAlignment.append(querySequence.charAt(i - 1));
+                        dsAlignment.append('-');
+                        i--;
+                    }
+                } else if (getMaxValueRowIndex() == distanceMatrix.length - 1) {
+                    while (j != 0) {
+                        qsAlignment.append('-');
+                        dsAlignment.append(dbSequence.charAt(j - 1));
+                        j--;
+                    }
+                }
+
                 setQuerySequenceAlignmentBeginning(i);
                 setDbSequenceAlignmentBeginning(j);
                 break;
             }
         }
+
+//        System.out.println("i = " + querySequenceAlignmentBeginning + "; j = " + dbSequenceAlignmentBeginning);
+//        System.out.println("-------------------------");
 
         sequencesWithAlignment[0] = qsAlignment.reverse().toString();
         sequencesWithAlignment[1] = dsAlignment.reverse().toString();
